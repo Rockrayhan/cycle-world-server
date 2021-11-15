@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
+const { query } = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
-
+const ObjectId = require('mongodb').ObjectId ;
 
 
 app.use(cors());
@@ -22,6 +23,25 @@ async function run() {
         const ordersCollection = database.collection('orders');
 
 
+      /*   // Admin ( Orders for admin )
+        app.get('/orders', async(req, res) => {
+            const cursor = ordersCollection.find({});
+            const orders = await cursor.toArray();
+            res.json(orders) ;
+        }) */
+
+
+
+        // GET (Orders)
+        app.get('/orders', async(req, res) => {
+            const email = req. query.email ;
+            const query = {email:email} 
+            console.log(query);
+            const cursor = ordersCollection.find(query);
+            const orders = await cursor.toArray();
+            res.json(orders) ;
+        })
+
         // POST (orders)
         app.post('/orders', async(req, res) => {
             const order = req.body ;
@@ -36,6 +56,16 @@ async function run() {
             const cursor = productsCollection.find({});
             const products = await cursor.toArray();
             res.send(products);
+        });
+
+
+        // GET single Products
+        app.get('/products/:id', async(req, res) => {
+            const id = req.params.id ;
+            console.log('getting id',id);
+            const query = {_id: ObjectId(id)} ;
+            const product = await productsCollection.findOne(query);
+            res.json(product) ;
         })
 
         // POST API (products)
@@ -46,7 +76,16 @@ async function run() {
             const result = await productsCollection.insertOne(product);
             console.log(result);
             res.json(result);
+        });
+
+        // DELETE (Product)
+        app.delete('/products/:id', async (req , res) => {
+            const id = req.params.id ;
+            const query = {_id: ObjectId(id)};
+            const result = await productsCollection.deleteOne(query) ;
         })
+
+
     }
     finally {
         // await client.close() ;
