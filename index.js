@@ -19,22 +19,33 @@ async function run() {
         await client.connect();
         const database = client.db('Cycle-World');
         const productsCollection = database.collection('products');
+        const ordersCollection = database.collection('orders');
+
+
+        // POST (orders)
+        app.post('/orders', async(req, res) => {
+            const order = req.body ;
+            const result = await ordersCollection.insertOne(order)
+            console.log(result);
+            res.json(result)
+        });
+
 
         // GET API (products)
-        app.get('/products', async(req, res) => {
+        app.get('/products', async (req, res) => {
             const cursor = productsCollection.find({});
-            const products = await cursor.toArray() ;
+            const products = await cursor.toArray();
             res.send(products);
         })
 
         // POST API (products)
         app.post('/products', async (req, res) => {
-            const product = req.body ;
-            console.log('hit the post api' , product);
+            const product = req.body;
+            console.log('hit the post api', product);
 
             const result = await productsCollection.insertOne(product);
             console.log(result);
-            res.json(result) ;
+            res.json(result);
         })
     }
     finally {
